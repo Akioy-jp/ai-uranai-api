@@ -1,3 +1,4 @@
 flask
 flatlib
 gunicorn
+flask-cors
