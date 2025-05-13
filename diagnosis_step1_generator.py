@@ -155,4 +155,4 @@ def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, 
     }
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=10000)
