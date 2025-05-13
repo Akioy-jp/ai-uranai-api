@@ -1,6 +1,6 @@
 # diagnosis_step1_generator.py
-from flask_cors import CORS
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from flatlib.chart import Chart
 from flatlib.datetime import Datetime
 from flatlib.geopos import GeoPos
@@ -9,6 +9,7 @@ from datetime import datetime
 import json
 
 app = Flask(__name__)
+CORS(app)  # ★ これを追加！
 
 # 数秘術：ライフパスナンバー計算
 def calculate_life_path_number(birthdate):
