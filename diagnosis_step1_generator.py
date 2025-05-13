@@ -103,6 +103,7 @@ def diagnose():
 
 # 診断値を生成する関数
 def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, longitude):
+    birthdate_str = birthdate_str.replace("-", "/")  # ←この1行を追加
     dt = Datetime(birthdate_str, birthtime_str, timezone)
     pos = GeoPos(str(latitude), str(longitude))
     chart = Chart(dt, pos, IDs=const.LIST_OBJECTS)
