@@ -154,5 +154,8 @@ def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, 
         "planets": planet_data
     }
 
+import os
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
