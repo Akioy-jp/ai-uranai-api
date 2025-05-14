@@ -32,7 +32,7 @@ def get_eto(year):
 def get_sukuyou(birthdate):
     sukuyou_names = [
         "昴宿", "畢宿", "觜宿", "参宿", "井宿", "鬼宿", "柳宿", "星宿", "張宿",
-        "翼宿", "軫宿", "角宿", "亢宿", "?宿", "房宿", "心宿", "尾宿", "箕宿",
+        "翼宿", "軫宿", "角宿", "亢宿", "氐宿", "房宿", "心宿", "尾宿", "箕宿",
         "斗宿", "女宿", "虚宿", "危宿", "室宿", "壁宿", "奎宿", "婁宿", "胃宿"
     ]
     base_date = datetime(1970, 1, 1)
@@ -42,13 +42,14 @@ def get_sukuyou(birthdate):
     return sukuyou_names[index]
 
 # マヤ暦
+MAYA_SIGILS = [
+    "赤い龍", "白い風", "青い夜", "黄色い種", "赤い蛇", "白い世界の橋渡し", "青い手", "黄色い星",
+    "赤い月", "白い犬", "青い猿", "黄色い人", "赤い空歩く者", "白い魔法使い", "青い鷲", "黄色い戦士",
+    "赤い地球", "白い鏡", "青い嵐", "黄色い太陽"
+]
+MAYA_COLORS = ["赤", "白", "青", "黄"]
+
 def calculate_maya_info(birthdate):
-    MAYA_SIGILS = [
-        "赤い龍", "白い風", "青い夜", "黄色い種", "赤い蛇", "白い世界の橋渡し", "青い手", "黄色い星",
-        "赤い月", "白い犬", "青い猿", "黄色い人", "赤い空歩く者", "白い魔法使い", "青い鷲", "黄色い戦士",
-        "赤い地球", "白い鏡", "青い嵐", "黄色い太陽"
-    ]
-    MAYA_COLORS = ["赤", "白", "青", "黄"]
     base_date = datetime(1960, 7, 26)
     target_date = datetime.strptime(birthdate, "%Y-%m-%d")
     days_diff = (target_date - base_date).days
@@ -56,8 +57,14 @@ def calculate_maya_info(birthdate):
     sigil = MAYA_SIGILS[(kin - 1) % 20]
     color = MAYA_COLORS[(kin - 1) % 4]
     tone = ((kin - 1) % 13) + 1
-    return {"kin": kin, "sigil": sigil, "color": color, "tone": tone}
+    return {
+        "kin": kin,
+        "sigil": sigil,
+        "color": color,
+        "tone": tone
+    }
 
+# 診断APIエンドポイント
 @app.route('/api/diagnose', methods=['POST'])
 def diagnose():
     data = request.json
@@ -71,9 +78,11 @@ def diagnose():
     )
     return jsonify(result)
 
+# 診断ロジック
 def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, longitude):
-    dt = Datetime(birthdate_str.replace('-', '/'), birthtime_str, timezone)
-    pos = GeoPos(str(int(float(latitude))), str(int(float(longitude))))
+    birthdate_slash = birthdate_str.replace("-", "/")
+    dt = Datetime(birthdate_slash, birthtime_str, timezone)
+    pos = GeoPos(latitude, longitude)
     chart = Chart(dt, pos, IDs=const.LIST_OBJECTS)
 
     planet_data = {}
@@ -90,9 +99,18 @@ def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, 
         p = chart.get(obj)
         sign = p.sign
         degree = round(p.lon, 2)
-        house = getattr(p, 'house', None)
 
-        planet_data[p.id] = {"sign": sign, "house": house, "degree": degree}
+        try:
+            house_num = chart.houses.getHouse(p.lon)
+            house = house_num.num
+        except Exception:
+            house = None
+
+        planet_data[p.id] = {
+            "sign": sign,
+            "house": house,
+            "degree": degree
+        }
 
         element = ELEMENT_MAP.get(sign)
         if element:
@@ -125,6 +143,7 @@ def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, 
         "planets": planet_data
     }
 
+# アプリ起動
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
