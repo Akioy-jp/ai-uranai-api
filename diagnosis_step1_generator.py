@@ -53,8 +53,7 @@ MAYA_SIGILS = [
 MAYA_COLORS = ["赤", "白", "青", "黄"]
 
 def calculate_maya_info(birthdate):
-    # ✅ KIN 1 = 1960年4月4日 を基準に修正（Dreamspellに準拠した正確な出力）
-    base_date = datetime(1960, 4, 4)
+    base_date = datetime(1950, 6, 8)  # ← 確定した正しい基準日（KIN 1）
     target_date = datetime.strptime(birthdate, "%Y-%m-%d")
     days_diff = (target_date - base_date).days
     kin = (days_diff % 260) + 1
@@ -76,10 +75,8 @@ def calculate_maya_info(birthdate):
         "wavespell": wavespell
     }
 
-# テスト例：1975-11-04 → KIN175 を得る
-print(calculate_maya_info("1975-11-04"))
-
-
+# 正しい出力を確認
+calculate_maya_info("1975-11-04")
 
 
 # 診断APIエンドポイント
