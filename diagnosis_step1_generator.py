@@ -1,16 +1,15 @@
-# diagnosis_step1_generator.py
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flatlib.chart import Chart
 from flatlib.datetime import Datetime
 from flatlib.geopos import GeoPos
-from flatlib import houses  # ←これを追加
 from flatlib import const
 from datetime import datetime
 import json
+import os
 
 app = Flask(__name__)
-CORS(app)  # ★ これを追加！
+CORS(app)
 
 # 数秘術：ライフパスナンバー計算
 def calculate_life_path_number(birthdate):
@@ -30,7 +29,7 @@ def get_eto(year):
     junishi = eto_junishi[diff % 12]
     return jikkan + junishi
 
-# 宿曜（27宿）簡易版：生年月日からインデックスで決定
+# 宿曜（27宿）簡易版
 def get_sukuyou(birthdate):
     sukuyou_names = [
         "昴宿", "畢宿", "觜宿", "参宿", "井宿", "鬼宿", "柳宿", "星宿", "張宿",
@@ -43,7 +42,7 @@ def get_sukuyou(birthdate):
     index = days_diff % 27
     return sukuyou_names[index]
 
-# カバラ数秘（簡易版：母音＝ソウル、全体＝デスティニー）
+# カバラ数秘術
 def calculate_kabbalah_numbers(name):
     letter_values = {
         'A':1,'B':2,'C':3,'D':4,'E':5,'F':8,'G':3,'H':5,'I':1,'J':1,'K':2,'L':3,'M':4,
@@ -64,13 +63,12 @@ def calculate_kabbalah_numbers(name):
         "destiny_number": reduce_number(destiny_total)
     }
 
-# マヤ暦（KIN番号、紋章、色、トーン）簡易版
+# マヤ暦
 MAYA_SIGILS = [
     "赤い龍", "白い風", "青い夜", "黄色い種", "赤い蛇", "白い世界の橋渡し", "青い手", "黄色い星",
     "赤い月", "白い犬", "青い猿", "黄色い人", "赤い空歩く者", "白い魔法使い", "青い鷲", "黄色い戦士",
     "赤い地球", "白い鏡", "青い嵐", "黄色い太陽"
 ]
-
 MAYA_COLORS = ["赤", "白", "青", "黄"]
 
 def calculate_maya_info(birthdate):
@@ -88,7 +86,7 @@ def calculate_maya_info(birthdate):
         "tone": tone
     }
 
-# 診断APIエンドポイント
+# 診断エンドポイント
 @app.route('/api/diagnose', methods=['POST'])
 def diagnose():
     data = request.json
@@ -102,15 +100,11 @@ def diagnose():
     )
     return jsonify(result)
 
-# 診断値を生成する関数
+# 診断処理
 def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, longitude):
-    birthdate_str = birthdate_str.replace("-", "/")  # ←この1行を追加
-    dt = Datetime(birthdate_str, birthtime_str, timezone)
-    # 修正前（エラーの原因）
-    # pos = GeoPos(str(latitude), str(longitude))
-
-    # ✅ 修正後
-    pos = GeoPos(str(int(float(latitude))), str(int(float(longitude))))
+    birthdate_str_slash = birthdate_str.replace("-", "/")
+    dt = Datetime(birthdate_str_slash, birthtime_str, timezone)
+    pos = GeoPos(str(float(latitude)), str(float(longitude)))
     chart = Chart(dt, pos, IDs=const.LIST_OBJECTS)
 
     planet_data = {}
@@ -122,32 +116,30 @@ def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, 
         "Gemini": "Air", "Libra": "Air", "Aquarius": "Air",
         "Cancer": "Water", "Scorpio": "Water", "Pisces": "Water"
     }
-    
+
     for obj in const.LIST_OBJECTS:
-    p = chart.get(obj)
-    sign = p.sign
-    try:
-        house = p.house  # 安全に取得
-    except AttributeError:
-        house = None
+        p = chart.get(obj)
+        sign = p.sign
+        try:
+            house = p.house
+        except AttributeError:
+            house = None
 
-    planet_data[p.id] = {
-        "sign": sign,
-        "house": house,
-        "degree": round(p.lon, 2)
-    }
+        planet_data[p.id] = {
+            "sign": sign,
+            "house": house,
+            "degree": round(p.lon, 2)
+        }
 
-    element = ELEMENT_MAP.get(sign)
-    if element:
-        element_count[element] += 1
+        element = ELEMENT_MAP.get(sign)
+        if element:
+            element_count[element] += 1
 
-    if house is not None:
-        house_distribution.setdefault(house, []).append(p.id)
+        if house is not None:
+            house_distribution.setdefault(house, []).append(p.id)
 
     most_element = max(element_count, key=element_count.get)
-    # 先に元の birthdate_str を使って year を取り出す
-year = int(birthdate_str.split("/")[0])  # split("/") に合わせる
-
+    year = int(birthdate_str.split("-")[0])
 
     return {
         "name": name,
@@ -170,8 +162,6 @@ year = int(birthdate_str.split("/")[0])  # split("/") に合わせる
         "maya": calculate_maya_info(birthdate_str),
         "planets": planet_data
     }
-
-import os
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
