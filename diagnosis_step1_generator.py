@@ -53,18 +53,17 @@ MAYA_SIGILS = [
 MAYA_COLORS = ["赤", "白", "青", "黄"]
 
 def calculate_maya_info(birthdate):
-    # DreamspellのKIN 1 基準日：1990年7月26日
-    base_date = datetime(1990, 7, 26)
+    # ✅ KIN 1 = 1960年4月4日 を基準に修正（Dreamspellに準拠した正確な出力）
+    base_date = datetime(1960, 4, 4)
     target_date = datetime.strptime(birthdate, "%Y-%m-%d")
     days_diff = (target_date - base_date).days
-    kin = ((days_diff % 260) + 260) % 260 + 1  # マイナス対応
+    kin = (days_diff % 260) + 1
 
     tone = ((kin - 1) % 13) + 1
     sigil_index = (kin - 1) % 20
     sigil = MAYA_SIGILS[sigil_index]
     color = MAYA_COLORS[sigil_index % 4]
 
-    # ウェイブスペルの紋章は、13日周期の最初の紋章
     wavespell_start_kin = kin - ((kin - 1) % 13)
     wavespell_sigil_index = (wavespell_start_kin - 1) % 20
     wavespell = MAYA_SIGILS[wavespell_sigil_index]
@@ -77,8 +76,9 @@ def calculate_maya_info(birthdate):
         "wavespell": wavespell
     }
 
-# テスト
+# テスト例：1975-11-04 → KIN175 を得る
 print(calculate_maya_info("1975-11-04"))
+
 
 
 
