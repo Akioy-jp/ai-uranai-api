@@ -127,7 +127,7 @@ def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, 
     p = chart.get(obj)
     sign = p.sign
     try:
-        house = p.house  # 安全に取得（存在しない場合はスキップ）
+        house = p.house  # 安全に取得
     except AttributeError:
         house = None
 
@@ -145,7 +145,9 @@ def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, 
         house_distribution.setdefault(house, []).append(p.id)
 
     most_element = max(element_count, key=element_count.get)
-    year = int(birthdate_str.split("-")[0])
+    # 先に元の birthdate_str を使って year を取り出す
+year = int(birthdate_str.split("/")[0])  # split("/") に合わせる
+
 
     return {
         "name": name,
