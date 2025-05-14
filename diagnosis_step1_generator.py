@@ -57,24 +57,29 @@ def calculate_maya_info(birthdate):
     base_date = datetime(1990, 7, 26)
     target_date = datetime.strptime(birthdate, "%Y-%m-%d")
     days_diff = (target_date - base_date).days
-
     kin = ((days_diff % 260) + 260) % 260 + 1  # マイナス対応
+
     tone = ((kin - 1) % 13) + 1
     sigil_index = (kin - 1) % 20
+    sigil = MAYA_SIGILS[sigil_index]
+    color = MAYA_COLORS[sigil_index % 4]
+
+    # ウェイブスペルの紋章は、13日周期の最初の紋章
     wavespell_start_kin = kin - ((kin - 1) % 13)
     wavespell_sigil_index = (wavespell_start_kin - 1) % 20
+    wavespell = MAYA_SIGILS[wavespell_sigil_index]
 
     return {
         "kin": kin,
         "tone": tone,
-        "sigil": MAYA_SIGILS[sigil_index],
-        "color": MAYA_COLORS[sigil_index % 4],
-        "wavespell": MAYA_SIGILS[wavespell_sigil_index]
+        "sigil": sigil,
+        "color": color,
+        "wavespell": wavespell
     }
 
 # テスト
-info = calculate_maya_info("1975-11-04")
-print(info)
+print(calculate_maya_info("1975-11-04"))
+
 
 
 # 診断APIエンドポイント
