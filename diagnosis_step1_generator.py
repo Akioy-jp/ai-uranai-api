@@ -82,7 +82,9 @@ def diagnose():
 def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, longitude):
     birthdate_slash = birthdate_str.replace("-", "/")
     dt = Datetime(birthdate_slash, birthtime_str, timezone)
-    pos = GeoPos(latitude, longitude)
+    lat = str(float(latitude))
+    lon = str(float(longitude))
+    pos = GeoPos(lat, lon)
     chart = Chart(dt, pos, IDs=const.LIST_OBJECTS)
 
     planet_data = {}
