@@ -117,7 +117,7 @@ def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, 
         "Cancer": "Water", "Scorpio": "Water", "Pisces": "Water"
     }
 
-    for obj in const.LIST_OBJECTS:
+   for obj in const.LIST_OBJECTS:
     p = chart.get(obj)
     sign = p.sign
     degree = round(p.lon, 2)
@@ -126,7 +126,7 @@ def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, 
         house_num = chart.houses.getHouse(p.lon)
         house = house_num.num
     except Exception:
-        house = None  # 念のため例外処理
+        house = None
 
     planet_data[p.id] = {
         "sign": sign,
@@ -134,17 +134,16 @@ def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, 
         "degree": degree
     }
 
-    # エレメントカウント
     element = ELEMENT_MAP.get(sign)
     if element:
         element_count[element] += 1
 
-    # ハウスごとの天体分布
     if house is not None:
         house_distribution.setdefault(house, []).append(p.id)
 
-    most_element = max(element_count, key=element_count.get)
-    year = int(birthdate_str.split("-")[0])
+# ✅ forループの外に置く（重要）
+most_element = max(element_count, key=element_count.get)
+year = int(birthdate_str.split("/")[0])  # すでに replace で "/" に変えている場合はこちら
 
     return {
         "name": name,
