@@ -117,29 +117,29 @@ def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, 
         "Cancer": "Water", "Scorpio": "Water", "Pisces": "Water"
     }
 
-   for obj in const.LIST_OBJECTS:
-    p = chart.get(obj)
-    sign = p.sign
-    degree = round(p.lon, 2)
+    for obj in const.LIST_OBJECTS:
+        p = chart.get(obj)
+        sign = p.sign
+        degree = round(p.lon, 2)
 
-    try:
-        house_num = chart.houses.getHouse(p.lon)
-        house = house_num.num
-    except Exception:
-        house = None
+        try:
+            house_num = chart.houses.getHouse(p.lon)
+            house = house_num.num
+        except Exception:
+            house = None
 
-    planet_data[p.id] = {
-        "sign": sign,
-        "house": house,
-        "degree": degree
-    }
+        planet_data[p.id] = {
+            "sign": sign,
+            "house": house,
+            "degree": degree
+        }
 
-    element = ELEMENT_MAP.get(sign)
-    if element:
-        element_count[element] += 1
+        element = ELEMENT_MAP.get(sign)
+        if element:
+            element_count[element] += 1
 
-    if house is not None:
-        house_distribution.setdefault(house, []).append(p.id)
+        if house is not None:
+            house_distribution.setdefault(house, []).append(p.id)
 
 # ✅ forループの外に置く（重要）
 most_element = max(element_count, key=element_count.get)
