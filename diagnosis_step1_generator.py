@@ -41,8 +41,6 @@ def get_sukuyou(birthdate):
     index = days_diff % 27
     return sukuyou_names[index]
 
-# マヤ暦
-# マヤ暦（KIN番号、紋章、色、音、WS）正確計算
 from datetime import datetime
 
 MAYA_SIGILS = [
@@ -55,23 +53,28 @@ MAYA_SIGILS = [
 MAYA_COLORS = ["赤", "白", "青", "黄"]
 
 def calculate_maya_info(birthdate):
-    # 基準日：KIN1 = 1987年8月13日（ツォルキンの始まり）
-    base_date = datetime(1987, 8, 13)
+    # DreamspellのKIN 1 基準日：1990年7月26日
+    base_date = datetime(1990, 7, 26)
     target_date = datetime.strptime(birthdate, "%Y-%m-%d")
     days_diff = (target_date - base_date).days
 
-    kin = (days_diff % 260) + 1
+    kin = ((days_diff % 260) + 260) % 260 + 1  # マイナス対応
     tone = ((kin - 1) % 13) + 1
     sigil_index = (kin - 1) % 20
-    wavespell_index = ((kin - 1) // 13) % 20
+    wavespell_start_kin = kin - ((kin - 1) % 13)
+    wavespell_sigil_index = (wavespell_start_kin - 1) % 20
 
     return {
         "kin": kin,
         "tone": tone,
         "sigil": MAYA_SIGILS[sigil_index],
         "color": MAYA_COLORS[sigil_index % 4],
-        "wavespell": MAYA_SIGILS[wavespell_index]
+        "wavespell": MAYA_SIGILS[wavespell_sigil_index]
     }
+
+# テスト
+info = calculate_maya_info("1975-11-04")
+print(info)
 
 
 # 診断APIエンドポイント
