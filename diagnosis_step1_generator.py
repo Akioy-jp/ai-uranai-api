@@ -4,6 +4,7 @@ from flask_cors import CORS
 from flatlib.chart import Chart
 from flatlib.datetime import Datetime
 from flatlib.geopos import GeoPos
+from flatlib import houses  # ←これを追加
 from flatlib import const
 from datetime import datetime
 import json
@@ -121,13 +122,11 @@ def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, 
         "Gemini": "Air", "Libra": "Air", "Aquarius": "Air",
         "Cancer": "Water", "Scorpio": "Water", "Pisces": "Water"
     }
-
-    from flatlib import houses  # 追加
     
     for obj in const.LIST_OBJECTS:
         p = chart.get(obj)
         sign = p.sign
-        house = houses.houses(p.lon, chart.houses)  # ← 修正ここ
+        house = houses.houses(p.lon, chart.houses)
         planet_data[p.id] = {
             "sign": sign,
             "house": house,
