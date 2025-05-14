@@ -82,8 +82,16 @@ def diagnose():
 def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, longitude):
     birthdate_slash = birthdate_str.replace("-", "/")
     dt = Datetime(birthdate_slash, birthtime_str, timezone)
-    lat = str(float(latitude))
-    lon = str(float(longitude))
+
+    def decimal_to_dms(value):
+        deg = int(float(value))
+        min_float = abs(float(value) - deg) * 60
+        minutes = int(min_float)
+        seconds = int((min_float - minutes) * 60)
+        return f"{deg}:{minutes}:{seconds}"
+
+    lat = decimal_to_dms(latitude)
+    lon = decimal_to_dms(longitude)
     pos = GeoPos(lat, lon)
     chart = Chart(dt, pos, IDs=const.LIST_OBJECTS)
 
