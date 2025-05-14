@@ -124,17 +124,24 @@ def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, 
     }
     
     for obj in const.LIST_OBJECTS:
-        p = chart.get(obj)
-        sign = p.sign
-        house = houses.houses(p.lon, chart.houses)
-        planet_data[p.id] = {
-            "sign": sign,
-            "house": house,
-            "degree": round(p.lon, 2)
-        }
-        element = ELEMENT_MAP.get(sign)
-        if element:
-            element_count[element] += 1
+    p = chart.get(obj)
+    sign = p.sign
+    try:
+        house = p.house  # 安全に取得（存在しない場合はスキップ）
+    except AttributeError:
+        house = None
+
+    planet_data[p.id] = {
+        "sign": sign,
+        "house": house,
+        "degree": round(p.lon, 2)
+    }
+
+    element = ELEMENT_MAP.get(sign)
+    if element:
+        element_count[element] += 1
+
+    if house is not None:
         house_distribution.setdefault(house, []).append(p.id)
 
     most_element = max(element_count, key=element_count.get)
