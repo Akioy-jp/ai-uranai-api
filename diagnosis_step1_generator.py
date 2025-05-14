@@ -122,10 +122,12 @@ def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, 
         "Cancer": "Water", "Scorpio": "Water", "Pisces": "Water"
     }
 
+    from flatlib import houses  # 追加
+    
     for obj in const.LIST_OBJECTS:
         p = chart.get(obj)
         sign = p.sign
-        house = chart.houses.getHouse(p.lon).num  # ✅ ハウス番号（1〜12）を取得
+        house = houses.houses(p.lon, chart.houses)  # ← 修正ここ
         planet_data[p.id] = {
             "sign": sign,
             "house": house,
