@@ -5,7 +5,6 @@ from flatlib.datetime import Datetime
 from flatlib.geopos import GeoPos
 from flatlib import const
 from datetime import datetime
-import json
 import os
 
 app = Flask(__name__)
@@ -42,36 +41,14 @@ def get_sukuyou(birthdate):
     index = days_diff % 27
     return sukuyou_names[index]
 
-# カバラ数秘術
-def calculate_kabbalah_numbers(name):
-    letter_values = {
-        'A':1,'B':2,'C':3,'D':4,'E':5,'F':8,'G':3,'H':5,'I':1,'J':1,'K':2,'L':3,'M':4,
-        'N':5,'O':7,'P':8,'Q':1,'R':2,'S':3,'T':4,'U':6,'V':6,'W':6,'X':5,'Y':1,'Z':7
-    }
-    vowels = {'A', 'E', 'I', 'O', 'U'}
-    name = name.upper()
-    soul_total = sum(letter_values[ch] for ch in name if ch in vowels and ch in letter_values)
-    destiny_total = sum(letter_values[ch] for ch in name if ch in letter_values)
-
-    def reduce_number(n):
-        while n >= 10 and n not in [11, 22, 33]:
-            n = sum(int(d) for d in str(n))
-        return n
-
-    return {
-        "soul_number": reduce_number(soul_total),
-        "destiny_number": reduce_number(destiny_total)
-    }
-
 # マヤ暦
-MAYA_SIGILS = [
-    "赤い龍", "白い風", "青い夜", "黄色い種", "赤い蛇", "白い世界の橋渡し", "青い手", "黄色い星",
-    "赤い月", "白い犬", "青い猿", "黄色い人", "赤い空歩く者", "白い魔法使い", "青い鷲", "黄色い戦士",
-    "赤い地球", "白い鏡", "青い嵐", "黄色い太陽"
-]
-MAYA_COLORS = ["赤", "白", "青", "黄"]
-
 def calculate_maya_info(birthdate):
+    MAYA_SIGILS = [
+        "赤い龍", "白い風", "青い夜", "黄色い種", "赤い蛇", "白い世界の橋渡し", "青い手", "黄色い星",
+        "赤い月", "白い犬", "青い猿", "黄色い人", "赤い空歩く者", "白い魔法使い", "青い鷲", "黄色い戦士",
+        "赤い地球", "白い鏡", "青い嵐", "黄色い太陽"
+    ]
+    MAYA_COLORS = ["赤", "白", "青", "黄"]
     base_date = datetime(1960, 7, 26)
     target_date = datetime.strptime(birthdate, "%Y-%m-%d")
     days_diff = (target_date - base_date).days
@@ -79,14 +56,8 @@ def calculate_maya_info(birthdate):
     sigil = MAYA_SIGILS[(kin - 1) % 20]
     color = MAYA_COLORS[(kin - 1) % 4]
     tone = ((kin - 1) % 13) + 1
-    return {
-        "kin": kin,
-        "sigil": sigil,
-        "color": color,
-        "tone": tone
-    }
+    return {"kin": kin, "sigil": sigil, "color": color, "tone": tone}
 
-# 診断エンドポイント
 @app.route('/api/diagnose', methods=['POST'])
 def diagnose():
     data = request.json
@@ -95,15 +66,13 @@ def diagnose():
         birthdate_str=data['birthdate'],
         birthtime_str=data['birthtime'],
         timezone=data['timezone'],
-        latitude=data['latitude'],
-        longitude=data['longitude']
+        latitude=str(data['latitude']),
+        longitude=str(data['longitude'])
     )
     return jsonify(result)
 
-# 診断処理
 def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, longitude):
-    birthdate_str_slash = birthdate_str.replace("-", "/")
-    dt = Datetime(birthdate_str_slash, birthtime_str, timezone)
+    dt = Datetime(birthdate_str.replace('-', '/'), birthtime_str, timezone)
     pos = GeoPos(latitude, longitude)
     chart = Chart(dt, pos, IDs=const.LIST_OBJECTS)
 
@@ -121,18 +90,9 @@ def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, 
         p = chart.get(obj)
         sign = p.sign
         degree = round(p.lon, 2)
+        house = getattr(p, 'house', None)
 
-        try:
-            house_num = chart.houses.getHouse(p.lon)
-            house = house_num.num
-        except Exception:
-            house = None
-
-        planet_data[p.id] = {
-            "sign": sign,
-            "house": house,
-            "degree": degree
-        }
+        planet_data[p.id] = {"sign": sign, "house": house, "degree": degree}
 
         element = ELEMENT_MAP.get(sign)
         if element:
@@ -141,9 +101,8 @@ def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, 
         if house is not None:
             house_distribution.setdefault(house, []).append(p.id)
 
-# ✅ forループの外に置く（重要）
-most_element = max(element_count, key=element_count.get)
-year = int(birthdate_str.split("/")[0])  # すでに replace で "/" に変えている場合はこちら
+    most_element = max(element_count, key=element_count.get)
+    year = int(birthdate_str.split("-")[0])
 
     return {
         "name": name,
@@ -162,7 +121,6 @@ year = int(birthdate_str.split("/")[0])  # すでに replace で "/" に変え�
         "life_path_number": calculate_life_path_number(birthdate_str),
         "eto_year": get_eto(year),
         "sukuyou": get_sukuyou(birthdate_str),
-        "kabbalah": calculate_kabbalah_numbers(name),
         "maya": calculate_maya_info(birthdate_str),
         "planets": planet_data
     }
