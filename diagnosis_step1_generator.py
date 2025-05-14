@@ -125,7 +125,7 @@ def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, 
     for obj in const.LIST_OBJECTS:
         p = chart.get(obj)
         sign = p.sign
-        house = p.house
+        house = chart.houses.getHouse(p.lon)  # ✅ ここでハウスを取得
         planet_data[p.id] = {
             "sign": sign,
             "house": house,
