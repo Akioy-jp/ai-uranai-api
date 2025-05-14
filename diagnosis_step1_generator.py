@@ -42,27 +42,37 @@ def get_sukuyou(birthdate):
     return sukuyou_names[index]
 
 # マヤ暦
+# マヤ暦（KIN番号、紋章、色、音、WS）正確計算
+from datetime import datetime
+
 MAYA_SIGILS = [
-    "赤い龍", "白い風", "青い夜", "黄色い種", "赤い蛇", "白い世界の橋渡し", "青い手", "黄色い星",
-    "赤い月", "白い犬", "青い猿", "黄色い人", "赤い空歩く者", "白い魔法使い", "青い鷲", "黄色い戦士",
-    "赤い地球", "白い鏡", "青い嵐", "黄色い太陽"
+    "赤い龍", "白い風", "青い夜", "黄色い種", "赤い蛇",
+    "白い世界の橋渡し", "青い手", "黄色い星", "赤い月", "白い犬",
+    "青い猿", "黄色い人", "赤い空歩く者", "白い魔法使い", "青い鷲",
+    "黄色い戦士", "赤い地球", "白い鏡", "青い嵐", "黄色い太陽"
 ]
+
 MAYA_COLORS = ["赤", "白", "青", "黄"]
 
 def calculate_maya_info(birthdate):
-    base_date = datetime(1960, 7, 26)
+    # 基準日：KIN1 = 1987年8月13日（ツォルキンの始まり）
+    base_date = datetime(1987, 8, 13)
     target_date = datetime.strptime(birthdate, "%Y-%m-%d")
     days_diff = (target_date - base_date).days
+
     kin = (days_diff % 260) + 1
-    sigil = MAYA_SIGILS[(kin - 1) % 20]
-    color = MAYA_COLORS[(kin - 1) % 4]
     tone = ((kin - 1) % 13) + 1
+    sigil_index = (kin - 1) % 20
+    wavespell_index = ((kin - 1) // 13) % 20
+
     return {
         "kin": kin,
-        "sigil": sigil,
-        "color": color,
-        "tone": tone
+        "tone": tone,
+        "sigil": MAYA_SIGILS[sigil_index],
+        "color": MAYA_COLORS[sigil_index % 4],
+        "wavespell": MAYA_SIGILS[wavespell_index]
     }
+
 
 # 診断APIエンドポイント
 @app.route('/api/diagnose', methods=['POST'])
