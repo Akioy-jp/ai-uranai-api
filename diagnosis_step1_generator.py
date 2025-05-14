@@ -109,7 +109,7 @@ def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, 
     # pos = GeoPos(str(latitude), str(longitude))
 
     # ✅ 修正後
-    pos = GeoPos(str(float(latitude)), str(float(longitude)))
+    pos = GeoPos(str(int(float(latitude))), str(int(float(longitude))))
     chart = Chart(dt, pos, IDs=const.LIST_OBJECTS)
 
     planet_data = {}
