@@ -53,10 +53,11 @@ MAYA_SIGILS = [
 MAYA_COLORS = ["赤", "白", "青", "黄"]
 
 def calculate_maya_info(birthdate):
-    base_date = datetime(1950, 6, 8)  # ← 確定した正しい基準日（KIN 1）
+    # ✅ 確定した正しい基準日（KIN 1）
+    base_date = datetime(1900, 8, 15)
     target_date = datetime.strptime(birthdate, "%Y-%m-%d")
     days_diff = (target_date - base_date).days
-    kin = (days_diff % 260) + 1
+    kin = (days_diff % 260 + 260) % 260 + 1
 
     tone = ((kin - 1) % 13) + 1
     sigil_index = (kin - 1) % 20
@@ -75,7 +76,7 @@ def calculate_maya_info(birthdate):
         "wavespell": wavespell
     }
 
-# 正しい出力を確認
+# 検証：1975-11-04
 calculate_maya_info("1975-11-04")
 
 
