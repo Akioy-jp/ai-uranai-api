@@ -28,6 +28,8 @@ def get_eto(year):
     junishi = eto_junishi[diff % 12]
     return jikkan + junishi
 
+from datetime import datetime
+
 SUKUYO_STARS = [
     "昴宿", "畢宿", "觜宿", "参宿", "井宿", "鬼宿", "柳宿", "星宿", "張宿",
     "翼宿", "軫宿", "角宿", "亢宿", "氐宿", "房宿", "心宿", "尾宿", "箕宿",
