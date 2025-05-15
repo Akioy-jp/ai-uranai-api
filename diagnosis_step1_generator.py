@@ -169,7 +169,7 @@ def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, 
         "dominant_element": most_element,
         "life_path_number": calculate_life_path_number(birthdate_str),
         "eto_year": get_eto(year),
-        "sukuyou": get_sukuyou(birthdate_str),
+        "sukuyou": calculate_sukuyo_star(birthdate_str),  # ← 修正ここ
         "maya": calculate_maya_info(birthdate_str),
         "planets": planet_data
     }
