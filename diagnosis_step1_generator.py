@@ -28,18 +28,21 @@ def get_eto(year):
     junishi = eto_junishi[diff % 12]
     return jikkan + junishi
 
-# 宿曜（27宿）簡易版
-def get_sukuyou(birthdate):
-    sukuyou_names = [
-        "昴宿", "畢宿", "觜宿", "参宿", "井宿", "鬼宿", "柳宿", "星宿", "張宿",
-        "翼宿", "軫宿", "角宿", "亢宿", "氐宿", "房宿", "心宿", "尾宿", "箕宿",
-        "斗宿", "女宿", "虚宿", "危宿", "室宿", "壁宿", "奎宿", "婁宿", "胃宿"
-    ]
-    base_date = datetime(1970, 1, 1)
+SUKUYO_STARS = [
+    "昴宿", "畢宿", "觜宿", "参宿", "井宿", "鬼宿", "柳宿", "星宿", "張宿",
+    "翼宿", "軫宿", "角宿", "亢宿", "氐宿", "房宿", "心宿", "尾宿", "箕宿",
+    "斗宿", "女宿", "虚宿", "危宿", "室宿", "壁宿", "奎宿", "婁宿", "胃宿"
+]
+
+def calculate_sukuyo_star(birthdate):
+    base_date = datetime(1900, 1, 10)  # 昴宿起点
     target_date = datetime.strptime(birthdate, "%Y-%m-%d")
     days_diff = (target_date - base_date).days
-    index = days_diff % 27
-    return sukuyou_names[index]
+    index = (days_diff % 27 + 27) % 27
+    return SUKUYO_STARS[index]
+
+# 1975-11-04で検証
+calculate_sukuyo_star("1975-11-04")
 
 from datetime import datetime
 
