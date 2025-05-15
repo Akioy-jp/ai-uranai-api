@@ -37,14 +37,11 @@ SUKUYO_STARS = [
 ]
 
 def calculate_sukuyo_star(birthdate):
-    base_date = datetime(1900, 1, 10)  # 昴宿起点
+    base_date = datetime(1880, 1, 27)  # ✅ 昴宿スタート日（心宿判定と整合）
     target_date = datetime.strptime(birthdate, "%Y-%m-%d")
     days_diff = (target_date - base_date).days
     index = (days_diff % 27 + 27) % 27
     return SUKUYO_STARS[index]
-
-# 1975-11-04で検証
-calculate_sukuyo_star("1975-11-04")
 
 from datetime import datetime
 
@@ -54,12 +51,10 @@ MAYA_SIGILS = [
     "青い猿", "黄色い人", "赤い空歩く者", "白い魔法使い", "青い鷲",
     "黄色い戦士", "赤い地球", "白い鏡", "青い嵐", "黄色い太陽"
 ]
-
 MAYA_COLORS = ["赤", "白", "青", "黄"]
 
 def calculate_maya_info(birthdate):
-    # ✅ 確定した正しい基準日（KIN 1）
-    base_date = datetime(1900, 8, 15)
+    base_date = datetime(1880, 9, 9)  # ✅ KIN 1 の基準日（13moon.net 準拠）
     target_date = datetime.strptime(birthdate, "%Y-%m-%d")
     days_diff = (target_date - base_date).days
     kin = (days_diff % 260 + 260) % 260 + 1
@@ -81,8 +76,6 @@ def calculate_maya_info(birthdate):
         "wavespell": wavespell
     }
 
-# 検証：1975-11-04
-calculate_maya_info("1975-11-04")
 
 
 # 診断APIエンドポイント
@@ -169,7 +162,7 @@ def generate_step1_data(name, birthdate_str, birthtime_str, timezone, latitude, 
         "dominant_element": most_element,
         "life_path_number": calculate_life_path_number(birthdate_str),
         "eto_year": get_eto(year),
-        "sukuyou": calculate_sukuyo_star(birthdate_str),  # ← 修正ここ
+        "sukuyou": calculate_sukuyo_star(birthdate_str),
         "maya": calculate_maya_info(birthdate_str),
         "planets": planet_data
     }
